@@ -1,0 +1,82 @@
+version: "3.9"
+
+
+services:
+
+  db:
+    image: postgres:15.2
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres -U ${POSTGRES_USER}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data:cached
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+
+  app: &app
+    build:
+      context: .
+      target: app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/home/appuser/src/app
+      - ./docker:/home/appuser/src/docker
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
+    entrypoint: ['/home/appuser/src/docker/start.sh']
+    depends_on:
+      - db
+      - redis
+
+  migrations:
+    build:
+      context: .
+      target: migrations
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      DATABASE_SCHEME: "postgresql"
+    volumes:
+      - ./app:/home/appuser/src/app
+      - ./migrations:/home/appuser/src/migrations
+
+  worker:
+    <<: *app
+    entrypoint: [ "docker/worker.sh" ]
+    ports: []
+
+  test:
+    build:
+      context: .
+      target: test
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+    volumes:
+      - ./tests:/home/appuser/src/tests
+      - ./app:/home/appuser/src/app
+      - ./docker:/home/appuser/src/docker
+      - ./artifacts:/home/appuser/src/artifacts/
+      - ./pyproject.toml:/home/appuser/src/pyproject.toml
+
+volumes:
+  dbdata:

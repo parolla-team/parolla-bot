@@ -1,0 +1,125 @@
+[tool.poetry]
+name = "parolla-bot"
+version = "0.1.0"
+description = "A backend for Parolla Bot."
+authors = []
+
+[tool.poetry.dependencies]
+# WARN: keep python version in sync with python version in Dockerfile
+python = "^3.10"
+uvicorn = {extras = ["standard"], version = "^0.17.6"}
+fastapi = "^0.103"
+sqlalchemy = "^2.0.11"
+kafka-python = "^2.0.2"
+PyJWT = "^2.3.0"
+typer = {extras = ["all"], version = "^0.6.1"}
+watchfiles = "^0.13"
+celery = {extras = ["pytest"], version = "^5.2.6"}
+redis = "^4.3.1"
+sentry-sdk = "^1.12.0"
+dependency-injector = "^4.41.0"
+psycopg = "^3.1.10"
+psycopg-binary = "^3.1.10"
+orjson = "3.9.10"
+pydantic-settings = "^2.3.4"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.1.1"
+coverage = "^6.4.1"
+pytest-xdist = "^3.3.1"
+polyfactory = "^2.7.2"
+pytest-asyncio = "^0.21.1"
+gevent = "^23.7.0"
+httpx = "^0.24.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+alembic = "^1.7.7"
+ruff = "^0.0.274"
+black = "^22.3.0"
+isort = "^5.10.1"
+
+[tool.black]
+line-length = 120
+target-version = ['py310']
+exclude = 'migrations'
+
+
+[tool.isort]
+profile = "black"
+skip = ['migrations']
+
+
+[tool.ruff]
+target-version = "py310"
+fix = false
+line-length = 120
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "UP",  # pyupgrade
+    "C90", # mccabe
+    "N",   # pep8-naming
+    "DJ",  # flake8-django
+    "C4",  # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "BLE", # flake8-blind-except
+    "T20", # flake8-print
+    "ANN", # flake8-annotations
+    "PIE", # flake8-pie
+    "PT",  # flake8-pytest-style
+    "SIM", # flake8-simplify
+]
+
+ignore = [
+    "UP007",
+    "PT001",
+    "PT009",
+    "PT023",
+    "ANN002",
+    "ANN102",
+    "ANN003",
+    "ANN101",
+    "C408",
+    "B008",
+]
+
+exclude = [
+    "eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".tox",
+    ".venv",
+    ".pyc",
+    ".pyi",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "migrations",
+]
+
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "double"
+
+
+[tool.ruff.mccabe]
+max-complexity = 10
+
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+asyncio_mode = "auto"
+
+[tool.coverage.report]
+omit = [
+    "*/tests/*",
+]
+[tool.coverage.run]
+concurrency = ["thread", "gevent"]
